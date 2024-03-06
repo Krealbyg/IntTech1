@@ -1,4 +1,5 @@
-LiquidCrystal Library 
+/*
+  LiquidCrystal Library 
 
 
 
@@ -148,150 +149,121 @@ return b;
 }
 
 void loop() {
-
   buttonArray = readButtons(5);
   
-  
-  
-
-  if (buttonArray = 3)
-  {
-      sprayActivate(manSpray);
-
-  }
-  
   //------------------------------------------------------------------------------------------------------------------------------------------
- //Some things might wanna be put in different functions and or classes
+  // Some things might wanna be put in different functions and or classes
   // a switch for program states. 
   // idle state - waiting for anything to happen
   // in use state - should display nr 1 and nr 2 with leds -> manual spray button -> all sprays should be configurable delay
   // cleaning state - the system should not spray -> wait for idle to return
   // menu state - all other functionality should halt -> reconfigure spray delay for each time a spray can occur -> reset number of shots in the spray can -> menu closes after a certain idle time
   //------------------------------------------------------------------------------------------------------------------------------------------
-
-
-  switch (menuStart) {
-    case 0:
-      //base case / case 0 is currently justwaiting for the select button to be pressed, this has to be changed to showing the correct info
-      
-      if (timer > 0) 
-      {
-       timer--;
-      } 
-      else 
-      {
-        if (buttonArray == 1) 
-        {
-          menuStart = 1;
-          timer = 200;
-        
   
-        }
+  if (menuStart == 0) {
+    // base case / case 0 is currently just waiting for the select button to be pressed, this has to be changed to showing the correct info
+      
+    if (timer > 0) {
+      timer--;
+    } else {
+      if (buttonArray == 1) {
+        menuStart = 1;
+        timer = 100;
       }
-          //------------------------------------------------------------------------------------------------------------------------------------------
-                // temp display constantly updating at least every 2 seconds
-                // check for activation of system by light or motion sensor
-          //------------------------------------------------------------------------------------------------------------------------------------------
-                testTimer ++;
-      sensors.requestTemperatures();
-      float temperature = sensors.getTempCByIndex(0);
-      if (testTimer > 100)
-      {
+    }
+    
+    //------------------------------------------------------------------------------------------------------------------------------------------
+    // temp display constantly updating at least every 2 seconds
+    // check for activation of system by light or motion sensor
+    //------------------------------------------------------------------------------------------------------------------------------------------
+    testTimer ++;
+    sensors.requestTemperatures();
+    float temperature = sensors.getTempCByIndex(0);
+    if (testTimer > 100) {
       tempPrinter = temperature;
       testTimer = 0;
+    }
+
+    //prints the temperature on the idle screen
+    lcd.setCursor(0, 0);
+    lcd.print("Local temp: ");
+    lcd.setCursor(11, 0);
+    lcd.print(tempPrinter);
+
+    //prints the amount of sprays in the bottle
+    lcd.setCursor(0, 1);
+    lcd.print("Sprays left: ");
+    lcd.setCursor(12, 1);
+    lcd.print(amountOfSprays);
+  } 
+  else if (menuStart == 1) {
+    // timer is to make sure that whenever the button is pressed it does not instantly press the next option as well so you can actually see the menu.
+    if (timer > 0) {
+      timer--;
+    } else {
+      if (buttonArray == 1) {
+        executeAction();
+        timer = 100;
       }
+    }
 
+    // if the down button is pressed you go down in the list so the number goes up, cannot go above a hardcoded limit, this can be changed when needed.
+    if (buttonArray == 2) {
+      if (menu == 2) {
+         menu = -1;
+      } else {
+        menu++;
+        delay(300);
+      }
+    }
 
-      //prints the temperature on the idle screen
-      lcd.setCursor(0, 0);
-      lcd.print("Local temp: ");
-      lcd.setCursor(11, 0);
-      lcd.print(menuStart);
-      //lcd.print(tempPrinter);
+    lcd.setCursor(0, 0);
+    lcd.print(menuItems[menu]);
 
-      //prints the amount of sprays in the bottle
+    // menu cycles through so you only need 1 button for the scrolling of the menu, if there are more options the limits need to be changed
+    if (menu == 2) { 
       lcd.setCursor(0, 1);
-      lcd.print("Sprays left: ");
-      lcd.setCursor(12, 1);
-      lcd.print(amountOfSprays);
-     break;
-    case 1:
-      //timer is to make sure that whenever the button is pressed it does not instantly press the next option as well so you can actually see the menu.
-      if (timer > 0) 
-      {
-        timer--;
-      } 
-      else 
-      {
-        if (buttonArray == 1) {
-          executeAction();
-          timer = 200;
-        }
+      lcd.print(menuItems[0]);    
+    } else {
+      lcd.setCursor(0, 1);
+      lcd.print(menuItems[menu + 1]);
+    }
+  } 
+  else if (menuStart == 2) {
+    if (timer > 0) {
+      timer--;
+    } else {
+      if (buttonArray == 1) {
+        // what does it do
+        timer = 200;
       }
+    }
 
-      //if the down button is pressed you go down in the list so the number goes up, cannot go above a hardcoded limit, this can be changed when needed.
-      if (buttonArray == 2) 
-      {
-        if (menu == 2) 
-        {
-           menu = -1;
-        } 
-        else 
-        {
-          menu++;
-          delay(300);
-        }
-      }
-
-      lcd.setCursor(0, 0);
-      lcd.print(menuItems[menu]);
-
-      // menu cycles through so you only need 1 button for the scrolling of the menu, if there are more options the limits need to be changed
-      if (menu == 2) 
-      { 
-        lcd.setCursor(0, 1);
-        lcd.print(menuItems[0]);    
-      } 
-      else 
-      {
-        lcd.setCursor(0, 1);
-        lcd.print(menuItems[menu + 1]);
-      }
-      break;
-    case 2:
-      if (timer > 0) {
-        timer--;
+    if (buttonArray == 2) {
+      if (delayMenu == 3) {
+         delayMenu = -1;
       } else {
-        if (buttonArray == 1) {
-          //what does it do
-          timer = 200;
-        }
+        delayMenu++;
+        delay(300);
       }
-      if (buttonArray == 2) {
-        if (delayMenu == 3) {
-           delayMenu = -1;
-        } else {
-          delayMenu++;
-          delay(300);
-        }
-      }
-      lcd.setCursor(0, 0);
-      lcd.print(sprayDelayOptions[delayMenu]);
+    }
 
-      if (delayMenu == 3) { 
-        lcd.setCursor(0, 1);
-        lcd.print(sprayDelayOptions[0]);    
-      } else {
-        lcd.setCursor(0, 1);
-        lcd.print(sprayDelayOptions[delayMenu + 1]);
-      }
-      break;
-    case 3:
-      timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
-      break;
-    case 4:
-      timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
-      break;
+    lcd.setCursor(0, 0);
+    lcd.print(sprayDelayOptions[delayMenu]);
+
+    if (delayMenu == 3) { 
+      lcd.setCursor(0, 1);
+      lcd.print(sprayDelayOptions[0]);    
+    } else {
+      lcd.setCursor(0, 1);
+      lcd.print(sprayDelayOptions[delayMenu + 1]);
+    }
+  } 
+  else if (menuStart == 3) {
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  } 
+  else if (menuStart == 4) {
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
 }
 
@@ -301,11 +273,10 @@ void executeAction() {
   switch (menu) {
     case 0:
       menuStart = 0;
-      timer = 200;
       break;
     case 1:
      menuStart =2;
-     timer = 200;
+     timer = 100;
       break;
     case 2:
       //menuStart = 3;
@@ -322,25 +293,25 @@ void executeAction() {
         delay(300);
       }
       menuStart = 0;
-      timer = 200;
+      timer = 100;
 
       break;
     
   }
 }
 
-void sprayActivate(int delay)
-{
-  digitalWrite(mosfet, HIGH);
-  int  totaldelay = standardDelay + delay;
-  digitalWrite(mosfet, LOW);
+// void sprayActivate(int delay)
+// {
+//   digitalWrite(mosfet, HIGH);
+//   int  totaldelay = standardDelay + delay;
+//   digitalWrite(mosfet, LOW);
 
 
 
-}
-void Timer (int time)
-{
+// }
+// void Timer (int time)
+// {
 
 
 
-}
+// }
