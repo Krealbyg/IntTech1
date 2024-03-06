@@ -36,3 +36,4 @@
 *.opendb
 *.db-wal
 *.db-shm
+*.sqlite
