@@ -94,14 +94,12 @@ String sprayDelayOptions [4] = {"Return          " ,"Number 1 config ", "Number 
 int ledPin = 13;
 int echoPin = 9;
 int triggerPin = 8;
-
+int distance;
+long duration;
 
 
 //this needs to be on the non volataile memory:
 int amountOfSprays = 4200;
-
-
-
 
 void setup() {
 
@@ -155,6 +153,17 @@ return b;
 void loop() {
   buttonArray = readButtons(5);
   
+  // messure Distance in cm
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration / 2) / 29.1;
+
+
   //------------------------------------------------------------------------------------------------------------------------------------------
   // Some things might wanna be put in different functions and or classes
   // a switch for program states. 
