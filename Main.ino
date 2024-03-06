@@ -90,8 +90,9 @@ String menuItems [3] = {"Return          ", "Configure Delays", "Reset Sprays   
 String sprayDelayOptions [4] = {"Return          " ,"Number 1 config ", "Number 2 config ", "Manual config   " };
 
 //initialize the other components
-int ledPin =13;
-
+int ledPin = 13;
+int echoPin = 9;
+int triggerPin = 8;
 
 
 
@@ -112,6 +113,9 @@ void setup() {
 
   pinMode(ledPin, OUTPUT);
   
+  pinMode(triggerPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
   // Start up the onewire library
   sensors.begin();
 }
@@ -150,14 +154,10 @@ return b;
 void loop() {
 
   buttonArray = readButtons(5);
-  
-  
-  
 
-  if (buttonArray = 3)
+  if (buttonArray == 3)
   {
       sprayActivate(manSpray);
-
   }
   
   //------------------------------------------------------------------------------------------------------------------------------------------
