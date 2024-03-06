@@ -38,7 +38,7 @@
 // include the library code:
 #include <LiquidCrystal.h>
 
-
+#include "TimerSystemClass.h"
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -77,7 +77,10 @@ int timer = 0; // a timer for the buttons so they dont infinitly press when pres
 int manSpray = 1;
 int pissSpray =1;
 int shitSpray =1;
-int standardDelay = 15;
+int standardDelay = 16000;
+bool sprayActive = false;
+unsigned long time_now = 0;
+unsigned long time_now2 = 0;
 
 //temperature stuff
 int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish seconds
@@ -91,30 +94,35 @@ String menuItems [3] = {"Return          ", "Configure Delays", "Reset Sprays   
 String sprayDelayOptions [4] = {"Return          " ,"Number 1 config ", "Number 2 config ", "Manual config   " };
 
 //initialize the other components
+int ledPin =13;
 int ledPin = 13;
 int echoPin = 9;
 int triggerPin = 8;
 int distance;
 long duration;
+int mosfet = 7;
 
 
 //this needs to be on the non volataile memory:
 int amountOfSprays = 4200;
+
+
+
 
 void setup() {
 
   
   Serial.begin(9600);
   pinMode(A5, INPUT_PULLUP);
-
+  pinMode (mosfet, OUTPUT);
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
   pinMode(ledPin, OUTPUT);
-  
+
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
-
+  
   // Start up the onewire library
   sensors.begin();
 }
@@ -153,6 +161,7 @@ return b;
 void loop() {
   buttonArray = readButtons(5);
   
+   
   // messure Distance in cm
   digitalWrite(trigPin, LOW);
   delayMicroseconds(5);
@@ -173,6 +182,10 @@ void loop() {
   // menu state - all other functionality should halt -> reconfigure spray delay for each time a spray can occur -> reset number of shots in the spray can -> menu closes after a certain idle time
   //------------------------------------------------------------------------------------------------------------------------------------------
   
+  //spray delays is delay + 15 at least
+
+
+
   if (menuStart == 0) {
     // base case / case 0 is currently just waiting for the select button to be pressed, this has to be changed to showing the correct info
       
@@ -184,7 +197,15 @@ void loop() {
         timer = 100;
       }
     }
-    
+    if (buttonArray ==3){
+       sprayActive = true;
+    }
+    sprayActivate(manSpray);
+
+
+
+
+
     //------------------------------------------------------------------------------------------------------------------------------------------
     // temp display constantly updating at least every 2 seconds
     // check for activation of system by light or motion sensor
@@ -313,18 +334,22 @@ void executeAction() {
   }
 }
 
-// void sprayActivate(int delay)
-// {
-//   digitalWrite(mosfet, HIGH);
-//   int  totaldelay = standardDelay + delay;
-//   digitalWrite(mosfet, LOW);
+void sprayActivate(int delay)
+{
+  if (activate)
+  {
+    TimerSystemClass (manDelay);
+    digitalWrite(ledPin, HIGH);
+    TimerSystemClass(standardDelay);
+   
+   
+
+   digitalWrite(ledPin, LOW);
+
+  
+  }
+  
+  
 
 
-
-// }
-// void Timer (int time)
-// {
-
-
-
-// }
+}
