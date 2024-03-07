@@ -80,7 +80,7 @@ int shitSpray =1;
 int standardDelay = 18000;
 bool sprayActive = false;
 int toiletTime = 120000; //120 seconds
-int toiletMode = 1;
+int toiletMode = 0;
 //temperature stuff
 int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish  Seconds
 float tempPrinter =0; // this is what the lcd screen prints as what the temperature is.
@@ -305,8 +305,6 @@ void loop() {
       printingTwoLines(sprayDelayOptions[delayMenu],sprayDelayOptions[delayMenu + 1] );
     }
   } 
-
-  
   else if (menuStart == 3) {
     printingTwoLines(modeTexts[1], modeTexts[0]);
     if (magPut < magOpen)
@@ -318,7 +316,6 @@ void loop() {
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   } 
-
   else if (menuStart == 4) {
     if(!lightOn)
     {
@@ -338,35 +335,31 @@ void loop() {
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-
-
   else if (menuStart == 5) {
 
     //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
+    unsigned long start = millis();
+    while (millis() - start < ms)
+    {
+        if (distance > 100)
+        {
+            toiletMode == 1;
+            return;
+        }
+    }
 
-    
     if(toiletMode ==1)
     {
-
     printingTwoLines(modeTexts[2], modeTexts[0]);
     DelayTimer(toiletTime);
     }
-    else if (toiletMode ==2)
+    else if (toiletMode ==0)
     {
     printingTwoLines(modeTexts[3], modeTexts[0]);
-
     }
-    
-
-    
-
-
-
-
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-
   else if (menuStart == 6) {
 
     if (buttonArray == 2) {
@@ -398,7 +391,6 @@ void loop() {
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-
   else if (menuStart == 7) {
 
 
@@ -431,7 +423,6 @@ void loop() {
    
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-
   else if (menuStart == 8) {
 
 
@@ -461,11 +452,9 @@ void loop() {
     }   
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-
   else if (menuStart == 9) {
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-
   else if (menuStart == 10) {
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
@@ -520,8 +509,6 @@ void distanceCheck()
   {
     menuStart = 5;
   }
-
-
 }
 void magnetCheck()
 {
