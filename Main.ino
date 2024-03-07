@@ -79,8 +79,8 @@ int pissSpray =1;
 int shitSpray =1;
 int standardDelay = 18000;
 bool sprayActive = false;
-int toiletTime = 12; //120 seconds
-int toiletMode = 0;
+int toiletTime = 120000; //120 seconds
+int toiletMode = 2;
 //temperature stuff
 int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish  Seconds
 float tempPrinter =0; // this is what the lcd screen prints as what the temperature is.
@@ -240,7 +240,7 @@ void loop() {
     testTimer ++;
     tempChecker();
  
-    printingTwoLines("Local temp:" + String(distance)+ " ", "Sprays Left:" + String(amountOfSprays));
+    printingTwoLines("Local temp:" + String(tempPrinter)+ " ", "Sprays Left:" + String(amountOfSprays));
     
   } 
   else if (menuStart == 1) {
@@ -349,20 +349,33 @@ void loop() {
     
      //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
     unsigned long start = millis();
-    printingTwoLines(modeTexts[2], modeTexts[0]);
-    while (millis() - start < toiletTime)
+
+
+    if (toiletMode == 2)
     {
-        if (distance > 100)
-        {
-            toiletMode == 1;
-            return;
-        }
+
+          printingTwoLines(modeTexts[2], modeTexts[0]);
+          while (millis() - start < toiletTime)
+          {
+              if (distance > 100)
+              {
+                  toiletMode = 1;
+                  printingTwoLines (String(toiletMode), "aaaaaa");
+                  break;
+              } else if ( distance > 100)
+              {
+                toiletMode = 0;
+              }
+          }
     }
 
     if(toiletMode ==1)
     {
 
     sprayActivate(pissSpray);
+    toiletMode = 2;
+    menuStart = 0;
+    
     }
     else if (toiletMode == 0)
     {
@@ -373,7 +386,9 @@ void loop() {
 
 
     sprayActivate(shitSpray);
-    sprayActivate(1);
+    sprayActivate(3);
+    toiletMode = 2;
+    menuStart = 0;
     }
     }
     
@@ -628,7 +643,8 @@ void sprayActivate(int delay)
   digitalWrite(mosfet, HIGH);
   DelayTimer(standardDelay);
   digitalWrite(mosfet, LOW);
-  toiletMode = 0;
+  toiletMode = 2;
+  
   
 
 
@@ -646,11 +662,11 @@ void DelayTimer(unsigned long ms)
    
 /*
 idle = leds uit
-menu
-schoonmaken
-nr 1
-nr 2
-unknown
+menu = rood aan
+schoonmaken = groen aan
+nr 1 = geel aan
+nr 2 = geel en rood aan
+unknown = groen en geel
     
 
 //////----------------------------------
