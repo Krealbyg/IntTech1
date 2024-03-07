@@ -339,7 +339,7 @@ void loop() {
 
     //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
     unsigned long start = millis();
-    while (millis() - start < ms)
+    while (millis() - start < toiletTime)
     {
         if (distance > 100)
         {
