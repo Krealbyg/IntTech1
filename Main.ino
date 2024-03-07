@@ -92,6 +92,7 @@ float tempPrinter =0; // this is what the lcd screen prints as what the temperat
 
 String menuItems [3] = {"Return          ", "Configure Delays", "Reset Sprays    "};
 String sprayDelayOptions [4] = {"Return          " ,"Number 1 config ", "Number 2 config ", "Manual config   " };
+String modeTexts [] = {"In progress     ","Cleaning mode   ", "Number 1        ", "Number 2        ", "Unknown usage   "       };
 
 //initialize the other components
 //int ledPin =13;
@@ -107,12 +108,16 @@ int motionPut = 0;
 int motionPin = 13;
 
 //magnet sensor
-int magPin = 1;
+int magPin = A3;
 int magPut = 0;
+int magOpen = 25;
 
 //light sensor
 int lightPin = A4;
 int lightValue = 0;
+int lightCurrent = 1000;
+int lightThres = 200;
+bool lightOn = false;
 //this needs to be on the non volataile memory:
 int amountOfSprays = 4200;
 
@@ -130,7 +135,7 @@ void setup() {
 
   //pinMode(ledPin, OUTPUT);
   pinMode(motionPin, INPUT);
-  pinMode(magPin, INPUT);
+  pinMode(magPin, INPUT_PULLUP);
 
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -171,8 +176,8 @@ return b;
 }
 
 void loop() {
-  buttonArray = readButtons(5);
-  magPut = digitalRead(magPin);
+  buttonArray = readButtons(A5);
+  magPut = analogRead(magPin);
   motionPut = digitalRead(motionPut);
   lightValue = analogRead (lightPin); 
 
@@ -211,33 +216,27 @@ void loop() {
         timer = 100;
       }
     }
+      
+    
     
 
+    light(lightValue);
+    if (lightOn)
+    {
+      menuStart = 4;
+    }
+    
 
     //------------------------------------------------------------------------------------------------------------------------------------------
     // temp display constantly updating at least every 2 seconds
     // check for activation of system by light or motion sensor
     //------------------------------------------------------------------------------------------------------------------------------------------
+
     testTimer ++;
-    sensors.requestTemperatures();
-    float temperature = sensors.getTempCByIndex(0);
-    if (testTimer > 20) {
-     //  tempPrinter = temperature;
-      testTimer = 0;
-    }
-
-    //prints the temperature on the idle screen
-    lcd.setCursor(0, 0);
-    lcd.print("Local temp: ");
-    lcd.setCursor(11, 0);
+    tempChecker();
+ 
+    printingTwoLines("Local temp:" + String(distance)+ " ", "Sprays Left:" + String(amountOfSprays));
     
-    lcd.print(lightValue);
-
-    //prints the amount of sprays in the bottle
-    lcd.setCursor(0, 1);
-    lcd.print("Sprays left: ");
-    lcd.setCursor(12, 1);
-    lcd.print(amountOfSprays);
   } 
   else if (menuStart == 1) {
     // timer is to make sure that whenever the button is pressed it does not instantly press the next option as well so you can actually see the menu.
@@ -256,20 +255,19 @@ void loop() {
          menu = -1;
       } else {
         menu++;
-        delay(300);
+        
       }
     }
 
-    lcd.setCursor(0, 0);
-    lcd.print(menuItems[menu]);
+    
 
     // menu cycles through so you only need 1 button for the scrolling of the menu, if there are more options the limits need to be changed
     if (menu == 2) { 
-      lcd.setCursor(0, 1);
-      lcd.print(menuItems[0]);    
+      
+      printingTwoLines(menuItems[menu],menuItems[0] );    
     } else {
-      lcd.setCursor(0, 1);
-      lcd.print(menuItems[menu + 1]);
+      
+      printingTwoLines(menuItems[menu],menuItems[menu + 1] );
     }
   } 
   else if (menuStart == 2) {
@@ -291,25 +289,103 @@ void loop() {
       }
     }
 
-    lcd.setCursor(0, 0);
-    lcd.print(sprayDelayOptions[delayMenu]);
-
+    
     if (delayMenu == 3) { 
-      lcd.setCursor(0, 1);
-      lcd.print(sprayDelayOptions[0]);    
+      
+      printingTwoLines(sprayDelayOptions[delayMenu],sprayDelayOptions[0] );   
     } else {
-      lcd.setCursor(0, 1);
-      lcd.print(sprayDelayOptions[delayMenu + 1]);
+      
+      printingTwoLines(sprayDelayOptions[delayMenu],sprayDelayOptions[delayMenu + 1] );
     }
   } 
+
+  
   else if (menuStart == 3) {
+    printingTwoLines(modeTexts[1], modeTexts[0]);
+    if (magPut < magOpen)
+    {
+      menuStart = 0;
+      
+
+    }
+
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   } 
+
   else if (menuStart == 4) {
+    if(!lightOn)
+    {
+      menuStart = 0;
+    }
+    printingTwoLines(modeTexts[4], modeTexts[0]);
+    magnetCheck();
+    
+    
+    
+    
+    
+
+
+
+
+
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
-}
 
+
+  else if (menuStart == 5) {
+
+    //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
+
+    //if timer 1:
+    //{
+
+    printingTwoLines(modeTexts[2], modeTexts[0]);
+    //}
+
+    //else if
+    //printingTwoLines(modeTexts[3], modeTexts[0]);
+    //
+
+
+
+
+
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  }
+
+  else if (menuStart == 6) {
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  }
+
+  else if (menuStart == 7) {
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  }
+
+
+
+
+
+
+}
+void distanceCheck()
+{
+  if (distance < 100 && distance > 20)
+  {
+    menuStart = 5;
+  }
+
+
+}
+void magnetCheck()
+{
+   if (magPut > magOpen)
+    {
+      menuStart = 3;
+     
+    } 
+
+}
 
 // Each case in the switch decides on a thing that can happen whenever an option is selected in the menu
 void executeAction() {
@@ -342,39 +418,49 @@ void executeAction() {
     
   }
 }
+void printingTwoLines(String line1, String line2)
+{
+      lcd.setCursor(0, 0);
+      lcd.print(line1);
+      lcd.setCursor(0, 1);
+      lcd.print(line2);
 
 
-// void sprayActivate(int delay)
-// {}
-//   
-   
-   
-// if (buttonArray ==3){
-    //   // sprayActive = true;
-    //   //sprayActivate(manSpray);
-    // }
-    
-// // if(magPut == HIGH)
-// // {
+
+}
+
+void light(int value)
+{
+    if(lightValue > (lightCurrent + 200) )
+    {
+        lightOn = true;
+    }
+    else if (lightValue < (lightCurrent - 200))
+    {
+        lightOn = false;
+    }
+    lightCurrent = lightValue;
+
+}
+
+
+void tempChecker()
+{
+   sensors.requestTemperatures();
+    float temperature = sensors.getTempCByIndex(0);
+    if (testTimer > 20) {
+      tempPrinter = temperature;
+      testTimer = 0;
+    }
+}
+
+void sprayActivate(int delay)
+{
+  lcd.print("Spray incoming  ");
+
+
+}
   
-// //   tempPrinter + 10;
-// // }
-
-// // if (motionPut == HIGH )
-// // {
-  
-
-// // }
-//////----------------------------------
-/* doos maken
-magneet sensor
-costomize delays
-text states, nr 1, nr 2, incoming spray, cleaning
-magic numbers
-amount of sprays in right memory
-
-*/ 
-
 
 void DelayTimer(unsigned long ms)
 {
@@ -387,3 +473,19 @@ void DelayTimer(unsigned long ms)
             return;
     }
 }
+   
+// if (buttonArray ==3){
+    //   // sprayActive = true;
+    //   //sprayActivate(manSpray);
+    // }
+    
+
+//////----------------------------------
+/* doos maken
+magneet sensor
+costomize delays
+text states, nr 1, nr 2, incoming spray, cleaning
+magic numbers
+amount of sprays in right memory
+
+*/ 
