@@ -374,7 +374,6 @@ magic numbers
 amount of sprays in right memory
 
 */ 
-}
 
 
 void DelayTimer(unsigned long ms)
