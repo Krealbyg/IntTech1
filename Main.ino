@@ -353,3 +353,16 @@ void sprayActivate(int delay)
 
 
 }
+
+
+void DelayTimer(unsigned long ms)
+{
+    unsigned long start = millis();
+    for (;;)
+    {
+        unsigned long now = millis();
+        unsigned long duration = now - start;
+        if (elapsed >= ms)
+            return;
+    }
+}
