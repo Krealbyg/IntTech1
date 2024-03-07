@@ -79,7 +79,7 @@ int pissSpray =1;
 int shitSpray =1;
 int standardDelay = 18000;
 bool sprayActive = false;
-int toiletTime = 120000; //120 seconds
+int toiletTime = 12; //120 seconds
 int toiletMode = 0;
 //temperature stuff
 int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish  Seconds
@@ -97,7 +97,7 @@ int delayCycle = 0;
 
 //initialize the other components
 //int ledPin =13;
-int echoPin = 9;
+int echoPin = A2;
 int triggerPin = 8;
 int distance;
 long duration;
@@ -240,7 +240,7 @@ void loop() {
     testTimer ++;
     tempChecker();
  
-    printingTwoLines("Local temp:" + String(tempPrinter)+ " ", "Sprays Left:" + String(amountOfSprays));
+    printingTwoLines("Local temp:" + String(distance)+ " ", "Sprays Left:" + String(amountOfSprays));
     
   } 
   else if (menuStart == 1) {
@@ -305,6 +305,8 @@ void loop() {
       printingTwoLines(sprayDelayOptions[delayMenu],sprayDelayOptions[delayMenu + 1] );
     }
   } 
+
+  
   else if (menuStart == 3) {
     printingTwoLines(modeTexts[1], modeTexts[0]);
     if (magPut < magOpen)
@@ -316,13 +318,16 @@ void loop() {
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   } 
+
   else if (menuStart == 4) {
-    if(!lightOn)
+    light(lightValue);
+    if(lightOn == false)
     {
       menuStart = 0;
     }
-    printingTwoLines(modeTexts[4], modeTexts[0]);
+    printingTwoLines(modeTexts[4], String(lightValue));
     magnetCheck();
+    distanceCheck();
     
     
     
@@ -335,10 +340,16 @@ void loop() {
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
+
+
   else if (menuStart == 5) {
 
     //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
+
+    
+     //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
     unsigned long start = millis();
+    printingTwoLines(modeTexts[2], modeTexts[0]);
     while (millis() - start < toiletTime)
     {
         if (distance > 100)
@@ -350,16 +361,32 @@ void loop() {
 
     if(toiletMode ==1)
     {
-    printingTwoLines(modeTexts[2], modeTexts[0]);
-    DelayTimer(toiletTime);
+
+    sprayActivate(pissSpray);
     }
-    else if (toiletMode ==0)
+    else if (toiletMode == 0)
     {
+
     printingTwoLines(modeTexts[3], modeTexts[0]);
+    if (distance > 100)
+    {
+
+
+    sprayActivate(shitSpray);
+    sprayActivate(1);
     }
+    }
+    
+
+    
+
+
+
+
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
+
   else if (menuStart == 6) {
 
     if (buttonArray == 2) {
@@ -391,6 +418,7 @@ void loop() {
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
+
   else if (menuStart == 7) {
 
 
@@ -423,6 +451,7 @@ void loop() {
    
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
+
   else if (menuStart == 8) {
 
 
@@ -452,9 +481,11 @@ void loop() {
     }   
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
+
   else if (menuStart == 9) {
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
+
   else if (menuStart == 10) {
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
@@ -509,6 +540,8 @@ void distanceCheck()
   {
     menuStart = 5;
   }
+
+
 }
 void magnetCheck()
 {
@@ -564,11 +597,11 @@ void printingTwoLines(String line1, String line2)
 
 void light(int value)
 {
-    if(lightValue > (lightCurrent + 200) )
+    if(lightValue > (lightCurrent + 100) )
     {
         lightOn = true;
     }
-    else if (lightValue < (lightCurrent - 200))
+    else if (lightValue < 400|| lightValue < (lightCurrent -100))
     {
         lightOn = false;
     }
@@ -595,6 +628,7 @@ void sprayActivate(int delay)
   digitalWrite(mosfet, HIGH);
   DelayTimer(standardDelay);
   digitalWrite(mosfet, LOW);
+  toiletMode = 0;
   
 
 
@@ -610,7 +644,13 @@ void DelayTimer(unsigned long ms)
     }
 }
    
-
+/*
+idle = leds uit
+menu
+schoonmaken
+nr 1
+nr 2
+unknown
     
 
 //////----------------------------------
