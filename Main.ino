@@ -94,8 +94,7 @@ String menuItems [3] = {"Return          ", "Configure Delays", "Reset Sprays   
 String sprayDelayOptions [4] = {"Return          " ,"Number 1 config ", "Number 2 config ", "Manual config   " };
 
 //initialize the other components
-int ledPin =13;
-int ledPin = 13;
+//int ledPin =13;
 int echoPin = 9;
 int triggerPin = 8;
 int distance;
@@ -103,6 +102,17 @@ long duration;
 int mosfet = 7;
 
 
+// Initmotionsensor
+int motionPut = 0;
+int motionPin = 13;
+
+//magnet sensor
+int magPin = 1;
+int magPut = 0;
+
+//light sensor
+int lightPin = A4;
+int lightValue = 0;
 //this needs to be on the non volataile memory:
 int amountOfSprays = 4200;
 
@@ -118,7 +128,9 @@ void setup() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
-  pinMode(ledPin, OUTPUT);
+  //pinMode(ledPin, OUTPUT);
+  pinMode(motionPin, INPUT);
+  pinMode(magPin, INPUT);
 
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -160,14 +172,16 @@ return b;
 
 void loop() {
   buttonArray = readButtons(5);
-  
-   
+  magPut = digitalRead(magPin);
+  motionPut = digitalRead(motionPut);
+  lightValue = analogRead (lightPin); 
+
   // messure Distance in cm
-  digitalWrite(trigPin, LOW);
+  digitalWrite(triggerPin, LOW);
   delayMicroseconds(5);
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(triggerPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  digitalWrite(triggerPin, LOW);
 
   duration = pulseIn(echoPin, HIGH);
   distance = (duration / 2) / 29.1;
@@ -197,13 +211,7 @@ void loop() {
         timer = 100;
       }
     }
-    if (buttonArray ==3){
-       sprayActive = true;
-    }
-    sprayActivate(manSpray);
-
-
-
+    
 
 
     //------------------------------------------------------------------------------------------------------------------------------------------
@@ -213,8 +221,8 @@ void loop() {
     testTimer ++;
     sensors.requestTemperatures();
     float temperature = sensors.getTempCByIndex(0);
-    if (testTimer > 100) {
-      tempPrinter = temperature;
+    if (testTimer > 20) {
+     //  tempPrinter = temperature;
       testTimer = 0;
     }
 
@@ -222,7 +230,8 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print("Local temp: ");
     lcd.setCursor(11, 0);
-    lcd.print(tempPrinter);
+    
+    lcd.print(lightValue);
 
     //prints the amount of sprays in the bottle
     lcd.setCursor(0, 1);
@@ -321,10 +330,10 @@ void executeAction() {
 
 
       for (int i = 0; i < 3; i++) {
-        digitalWrite(ledPin, HIGH);
-        delay(300);
-        digitalWrite(ledPin, LOW);
-        delay(300);
+        // digitalWrite(ledPin, HIGH);
+        // delay(300);
+        // digitalWrite(ledPin, LOW);
+        // delay(300);
       }
       menuStart = 0;
       timer = 100;
@@ -334,24 +343,37 @@ void executeAction() {
   }
 }
 
-void sprayActivate(int delay)
-{
-  if (activate)
-  {
-    TimerSystemClass (manDelay);
-    digitalWrite(ledPin, HIGH);
-    TimerSystemClass(standardDelay);
+
+// void sprayActivate(int delay)
+// {}
+//   
    
    
-
-   digitalWrite(ledPin, LOW);
-
+// if (buttonArray ==3){
+    //   // sprayActive = true;
+    //   //sprayActivate(manSpray);
+    // }
+    
+// // if(magPut == HIGH)
+// // {
   
-  }
-  
+// //   tempPrinter + 10;
+// // }
+
+// // if (motionPut == HIGH )
+// // {
   
 
+// // }
+//////----------------------------------
+/* doos maken
+magneet sensor
+costomize delays
+text states, nr 1, nr 2, incoming spray, cleaning
+magic numbers
+amount of sprays in right memory
 
+*/ 
 }
 
 
