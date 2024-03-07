@@ -77,13 +77,12 @@ int timer = 0; // a timer for the buttons so they dont infinitly press when pres
 int manSpray = 1;
 int pissSpray =1;
 int shitSpray =1;
-int standardDelay = 16000;
+int standardDelay = 18000;
 bool sprayActive = false;
-unsigned long time_now = 0;
-unsigned long time_now2 = 0;
-
+int toiletTime = 120000; //120 seconds
+int toiletMode = 1;
 //temperature stuff
-int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish seconds
+int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish  Seconds
 float tempPrinter =0; // this is what the lcd screen prints as what the temperature is.
 
 
@@ -93,6 +92,8 @@ float tempPrinter =0; // this is what the lcd screen prints as what the temperat
 String menuItems [3] = {"Return          ", "Configure Delays", "Reset Sprays    "};
 String sprayDelayOptions [4] = {"Return          " ,"Number 1 config ", "Number 2 config ", "Manual config   " };
 String modeTexts [] = {"In progress     ","Cleaning mode   ", "Number 1        ", "Number 2        ", "Unknown usage   "       };
+int delayOptions [4] = {15, 20, 25, 30};
+int delayCycle = 0;
 
 //initialize the other components
 //int ledPin =13;
@@ -217,7 +218,11 @@ void loop() {
       }
     }
       
-    
+    if( buttonArray ==3)
+    {
+      sprayActivate(manSpray);
+    }
+
     
 
     light(lightValue);
@@ -228,14 +233,14 @@ void loop() {
     
 
     //------------------------------------------------------------------------------------------------------------------------------------------
-    // temp display constantly updating at least every 2 seconds
+    // temp display constantly updating at least every 2  Seconds
     // check for activation of system by light or motion sensor
     //------------------------------------------------------------------------------------------------------------------------------------------
 
     testTimer ++;
     tempChecker();
  
-    printingTwoLines("Local temp:" + String(distance)+ " ", "Sprays Left:" + String(amountOfSprays));
+    printingTwoLines("Local temp:" + String(tempPrinter)+ " ", "Sprays Left:" + String(amountOfSprays));
     
   } 
   else if (menuStart == 1) {
@@ -255,6 +260,7 @@ void loop() {
          menu = -1;
       } else {
         menu++;
+        delay(300);
         
       }
     }
@@ -275,7 +281,8 @@ void loop() {
       timer--;
     } else {
       if (buttonArray == 1) {
-        // what does it do
+        executeDelayAction();
+        delay(300);
         timer = 200;
       }
     }
@@ -337,15 +344,21 @@ void loop() {
 
     //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
 
-    //if timer 1:
-    //{
+    
+    if(toiletMode ==1)
+    {
 
     printingTwoLines(modeTexts[2], modeTexts[0]);
-    //}
+    DelayTimer(toiletTime);
+    }
+    else if (toiletMode ==2)
+    {
+    printingTwoLines(modeTexts[3], modeTexts[0]);
 
-    //else if
-    //printingTwoLines(modeTexts[3], modeTexts[0]);
-    //
+    }
+    
+
+    
 
 
 
@@ -355,10 +368,105 @@ void loop() {
   }
 
   else if (menuStart == 6) {
+
+    if (buttonArray == 2) {
+      if (delayCycle == 3) {
+         delayCycle = -1;
+      } else {
+        delayCycle++;
+        delay(300);
+      }
+    }
+    if (delayCycle == 3) { 
+      
+      printingTwoLines(String(delayOptions[delayCycle]) + " Seconds       " + String (buttonArray),String(delayOptions[0])+ " Seconds       " );   
+    } else {
+      
+      printingTwoLines(String(delayOptions[delayCycle])+ " Seconds       ",String(delayOptions[delayCycle + 1]) + " Seconds       " );   
+    }
+    
+    if (buttonArray == 1 )
+    {
+      
+      pissSpray = delayCycle * 5;
+      menuStart = 0;
+      
+
+    }
+   
+
+
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
 
   else if (menuStart == 7) {
+
+
+    if (buttonArray == 2) {
+      if (delayCycle == 3) {
+         delayCycle = -1;
+      } else {
+        delayCycle++;
+        delay(300);
+      }
+    }
+    if (delayCycle == 3) { 
+      
+      printingTwoLines(String(delayOptions[delayCycle]) + " Seconds       " + String (buttonArray),String(delayOptions[0])+ " Seconds       " );   
+    } else {
+      
+      printingTwoLines(String(delayOptions[delayCycle])+ " Seconds       ",String(delayOptions[delayCycle + 1]) + " Seconds       " );   
+    }
+    
+    if (buttonArray == 1 )
+    {
+      
+      shitSpray = delayCycle * 5;
+      menuStart = 0;
+      
+
+    }
+  
+
+   
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  }
+
+  else if (menuStart == 8) {
+
+
+    if (buttonArray == 2) {
+      if (delayCycle == 3) {
+         delayCycle = -1;
+      } else {
+        delayCycle++;
+        delay(300);
+      }
+    }
+    if (delayCycle == 3) { 
+      
+      printingTwoLines(String(delayOptions[delayCycle]) + " Seconds       " + String (buttonArray),String(delayOptions[0])+ " Seconds       " );   
+    } else {
+      
+      printingTwoLines(String(delayOptions[delayCycle])+ " Seconds       ",String(delayOptions[delayCycle + 1]) + " Seconds       " );   
+    }
+    
+    if (buttonArray == 1 )
+    {
+      
+      manSpray = delayCycle * 5;
+      menuStart = 0;
+      
+
+    }   
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  }
+
+  else if (menuStart == 9) {
+    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+  }
+
+  else if (menuStart == 10) {
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
 
@@ -368,6 +476,44 @@ void loop() {
 
 
 }
+
+
+void executeDelayAction() {
+  switch (delayMenu) {
+    case 0:
+      menuStart = 1;
+
+
+      
+      break;
+    case 1:
+      menuStart = 6;
+      delayCycle =0;
+      timer = 20;
+     
+
+
+      break;
+    case 2:
+    menuStart = 7;
+    delayCycle =0;
+    timer = 20;
+     
+      break;
+
+    case 3:
+    menuStart = 8;
+    delayCycle =0;
+    timer = 20;
+     
+      break;
+    
+  }
+}
+
+
+
+
 void distanceCheck()
 {
   if (distance < 100 && distance > 20)
@@ -448,7 +594,7 @@ void tempChecker()
 {
    sensors.requestTemperatures();
     float temperature = sensors.getTempCByIndex(0);
-    if (testTimer > 20) {
+    if (testTimer > 100) {
       tempPrinter = temperature;
       testTimer = 0;
     }
@@ -456,7 +602,13 @@ void tempChecker()
 
 void sprayActivate(int delay)
 {
-  lcd.print("Spray incoming  ");
+  printingTwoLines("Spray incoming!!", "                ");
+  
+  DelayTimer((delay * 1000));
+  digitalWrite(mosfet, HIGH);
+  DelayTimer(standardDelay);
+  digitalWrite(mosfet, LOW);
+  
 
 
 }
@@ -467,22 +619,16 @@ void DelayTimer(unsigned long ms)
     unsigned long start = millis();
     while (millis() - start < ms)
     {
-        
+        timer = 10;
     }
 }
    
-// if (buttonArray ==3){
-    //   // sprayActive = true;
-    //   //sprayActivate(manSpray);
-    // }
+
     
 
 //////----------------------------------
 /* doos maken
-magneet sensor
-costomize delays
-text states, nr 1, nr 2, incoming spray, cleaning
-magic numbers
+
 amount of sprays in right memory
 
 */ 
