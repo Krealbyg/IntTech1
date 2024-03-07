@@ -359,30 +359,19 @@ void loop() {
         }
     }
 
-    if(toiletMode ==1)
+    if(toiletMode == 1)
     {
-
-    sprayActivate(pissSpray);
+        sprayActivate(pissSpray);
     }
     else if (toiletMode == 0)
     {
-
-    printingTwoLines(modeTexts[3], modeTexts[0]);
-    if (distance > 100)
-    {
-
-
-    sprayActivate(shitSpray);
-    sprayActivate(1);
+        printingTwoLines(modeTexts[3], modeTexts[0]);
+        if (distance > 100)
+        {
+            sprayActivate(shitSpray);
+            sprayActivate(1);
+        }
     }
-    }
-    
-
-    
-
-
-
-
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
