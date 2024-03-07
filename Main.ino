@@ -369,7 +369,7 @@ void loop() {
           }
     }
 
-    if(toiletMode ==1)
+    if(toiletMode == 1)
     {
 
     sprayActivate(pissSpray);
@@ -391,13 +391,6 @@ void loop() {
     menuStart = 0;
     }
     }
-    
-
-    
-
-
-
-
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
