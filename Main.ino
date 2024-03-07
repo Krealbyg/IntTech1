@@ -354,7 +354,7 @@ void loop() {
     {
         if (distance > 100)
         {
-            toiletMode == 1;
+            toiletMode = 1;
             return;
         }
     }
