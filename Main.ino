@@ -712,6 +712,6 @@ unknown = groen en blauw
 //////----------------------------------
 /* doos maken
 
-amount of sprays in right memory
+amount of sprays in right memory...
 
 */ 
