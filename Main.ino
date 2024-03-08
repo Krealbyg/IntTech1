@@ -106,12 +106,18 @@ int mosfet = 7;
 
 // Initmotionsensor
 int motionPut = 0;
-int motionPin = 13;
+int motionPin = A1;
 
 //magnet sensor
 int magPin = A3;
 int magPut = 0;
 int magOpen = 25;
+
+//led
+int redLed = 13;
+int greenLed = 9;
+int blueLed = 10;
+
 
 //light sensor
 int lightPin = A4;
@@ -128,7 +134,11 @@ int amountOfSprays = 4200;
 void setup() {
 
   
-  Serial.begin(9600);
+  pinMode(redLed, OUTPUT);
+  pinMode(greenLed, OUTPUT);
+  pinMode(blueLed, OUTPUT);
+
+
   pinMode(A5, INPUT_PULLUP);
   pinMode (mosfet, OUTPUT);
   // set up the LCD's number of columns and rows:
@@ -179,7 +189,7 @@ return b;
 void loop() {
   buttonArray = readButtons(A5);
   magPut = analogRead(magPin);
-  motionPut = digitalRead(motionPut);
+  motionPut = analogRead(motionPut);
   lightValue = analogRead (lightPin); 
 
   // messure Distance in cm
@@ -204,11 +214,13 @@ void loop() {
   
   //spray delays is delay + 15 at least
 
-
+  
 
   if (menuStart == 0) {
     // base case / case 0 is currently just waiting for the select button to be pressed, this has to be changed to showing the correct info
-      
+    digitalWrite(blueLed, LOW);
+    digitalWrite(redLed, LOW);
+    digitalWrite(greenLed, LOW);
     if (timer > 0) {
       timer--;
     } else {
@@ -245,6 +257,11 @@ void loop() {
   } 
   else if (menuStart == 1) {
     // timer is to make sure that whenever the button is pressed it does not instantly press the next option as well so you can actually see the menu.
+    digitalWrite(blueLed, LOW);
+    digitalWrite(redLed, HIGH);
+    
+    digitalWrite(greenLed, LOW);
+  
     if (timer > 0) {
       timer--;
     } else {
@@ -277,6 +294,11 @@ void loop() {
     }
   } 
   else if (menuStart == 2) {
+    digitalWrite(blueLed, LOW);
+    digitalWrite(redLed, HIGH);
+    
+    digitalWrite(greenLed, LOW);
+  
     if (timer > 0) {
       timer--;
     } else {
@@ -309,6 +331,11 @@ void loop() {
   
   else if (menuStart == 3) {
     printingTwoLines(modeTexts[1], modeTexts[0]);
+    digitalWrite(blueLed, LOW);
+    digitalWrite(redLed, LOW);
+    
+    digitalWrite(greenLed, HIGH);
+    
     if (magPut < magOpen)
     {
       menuStart = 0;
@@ -320,6 +347,10 @@ void loop() {
   } 
 
   else if (menuStart == 4) {
+    digitalWrite(blueLed, HIGH);
+    digitalWrite(redLed, LOW);
+    
+    digitalWrite(greenLed, HIGH);
     light(lightValue);
     if(lightOn == false)
     {
@@ -354,6 +385,11 @@ void loop() {
     if (toiletMode == 2)
     {
 
+      digitalWrite(blueLed, HIGH);
+      digitalWrite(redLed, LOW);
+    
+      digitalWrite(greenLed, LOW);
+
           printingTwoLines(modeTexts[2], modeTexts[0]);
           while (millis() - start < toiletTime)
           {
@@ -369,7 +405,7 @@ void loop() {
           }
     }
 
-    if(toiletMode == 1)
+    if(toiletMode ==1)
     {
 
     sprayActivate(pissSpray);
@@ -381,6 +417,10 @@ void loop() {
     {
 
     printingTwoLines(modeTexts[3], modeTexts[0]);
+    digitalWrite(blueLed, HIGH);
+    digitalWrite(redLed, HIGH);
+    
+    digitalWrite(greenLed, LOW);
     if (distance > 100)
     {
 
@@ -391,6 +431,13 @@ void loop() {
     menuStart = 0;
     }
     }
+    
+
+    
+
+
+
+
 
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   }
@@ -657,14 +704,14 @@ void DelayTimer(unsigned long ms)
 idle = leds uit
 menu = rood aan
 schoonmaken = groen aan
-nr 1 = geel aan
-nr 2 = geel en rood aan
-unknown = groen en geel
+nr 1 = blauw aan
+nr 2 = blauw en rood aan
+unknown = groen en blauw
     
 
 //////----------------------------------
 /* doos maken
 
-amount of sprays in right memory en de reset ervan
+amount of sprays in right memory
 
 */ 
