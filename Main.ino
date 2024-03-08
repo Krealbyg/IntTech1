@@ -79,7 +79,7 @@ int pissSpray =1;
 int shitSpray =1;
 int standardDelay = 18000;
 bool sprayActive = false;
-int toiletTime = 120000; //120 seconds
+int toiletTime = 10000; //120 seconds
 int toiletMode = 2;
 //temperature stuff
 int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish  Seconds
