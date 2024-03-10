@@ -1,9 +1,5 @@
 /*
   LiquidCrystal Library 
-
-
-
-
   The circuit:
  * LCD RS pin to digital pin 12
  * LCD Enable pin to digital pin 11
@@ -14,32 +10,31 @@
  * LCD R/W pin to ground
  * LCD VSS pin to ground
  * LCD VCC pin to 5V
- * 10K resistor:
+ * Variable resistor
  * ends to +5V and ground
  * wiper to LCD VO pin (pin 3)
-
- Library originally added 18 Apr 2008
- by David A. Mellis
- library modified 5 Jul 2009
- by Limor Fried (http://www.ladyada.net)
- example added 9 Jul 2009
- by Tom Igoe
- modified 22 Nov 2010
- by Tom Igoe
- modified 7 Nov 2016
- by Arturo Guadalupi
-
- This example code is in the public domain.
-
- https://docs.arduino.cc/learn/electronics/lcd-displays
-
 */
+/*
+TUTORIALS USED IN THE MAKING OF THIS:
+https://docs.arduino.cc/built-in-examples/basics/Blink/
+https://docs.arduino.cc/built-in-examples/digital/Button/
+https://blog.udemy.com/arduino-ldr/
+https://docs.arduino.cc/built-in-examples/analog/AnalogInput/
+https://github.com/milesburton/Arduino-Temperature-Control-Library/blob/master/examples/Single/Single.ino
+https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/
+https://docs.arduino.cc/learn/electronics/lcd-displays/
+https://web.archive.org/web/20210511143644/https://tronixstuff.com/2011/01/11/tutorial-using-analog-input-for-multiple-buttons/
+*/
+
+
+
+
+
+
 
 // include the library code:
 #include <LiquidCrystal.h>
-
-#include "TimerSystemClass.h"
-
+#include "TimerSystemClass.h" // we ended up not using this 
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <EEPROM.h>
@@ -59,14 +54,9 @@ DallasTemperature sensors(&oneWire);
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+
 //initialize the buttons and their press states
 int buttonArray = 0;
-
-
-// Old button states for 3 buttons, up, down and select
-int downstate = 0;
-int upstate = 0;
-int selectstate = 0;
 
 //initialize the menus
 int menuStart = 0; // Program states
@@ -75,13 +65,12 @@ int delayMenu = 0; //What menu option you want to select within the delay menu
 int timer = 0; // a timer for the buttons so they dont infinitly press when pressed but have a slight cooldown
 
 //initalize spray stuff
-int manSpray = 1;
-int pissSpray =1;
-int shitSpray =1;
-int standardDelay = 18000;
-bool sprayActive = false;
-int toiletTime = 10000; //120 seconds
-int toiletMode = 2;
+int manSpray = 1; //Delay for the manual spray
+int pissSpray =1; // Delay for the number 1 spray
+int shitSpray =1; // Delay for the number 2 spray
+int standardDelay = 18000; // the delay of the spray itself we cannot change
+int toiletTime = 10000; //10 seconds for testing purposes
+int toiletMode = 2;  // what the toilet is currently doing, 0 is number 1, 1 is number 2
 //temperature stuff
 int testTimer = 0; // this has to be a normal timer, for now it is to update the temperature on the lcd screen every 100 ticks, which is arounf 5 ish  Seconds
 float tempPrinter =0; // this is what the lcd screen prints as what the temperature is.
@@ -96,12 +85,13 @@ String modeTexts [] = {"In progress     ","Cleaning mode   ", "Number 1        "
 int delayOptions [4] = {15, 20, 25, 30};
 int delayCycle = 0;
 
-//initialize the other components
-//int ledPin =13;
+//initialize the distance sensor
 int echoPin = A2;
 int triggerPin = 8;
 int distance;
 long duration;
+
+//Initialize mosfet
 int mosfet = 7;
 
 
@@ -126,7 +116,8 @@ int lightValue = 0;
 int lightCurrent = 1000;
 int lightThres = 200;
 bool lightOn = false;
-//this needs to be on the non volataile memory:
+
+
 int amountOfSprays   ;
 
 
@@ -135,26 +126,33 @@ int amountOfSprays   ;
 
 void setup() {
 
-  
+  //Pinmodes for the rgb LED
   pinMode(redLed, OUTPUT);
   pinMode(greenLed, OUTPUT);
   pinMode(blueLed, OUTPUT);
 
-
+  //pinMode button array
   pinMode(A5, INPUT_PULLUP);
+
+  //pinmode for the button
   pinMode (mosfet, OUTPUT);
+
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
-  //pinMode(ledPin, OUTPUT);
+  //pinMode motion sensor
   pinMode(motionPin, INPUT);
+
+  //pinMode magnet sensor
   pinMode(magPin, INPUT_PULLUP);
 
+  //pinModes for the distance sensor
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
   
- // amountOfSprays = EEPROM.get(0, memSprays);
+  //Get the value of the eeprom for the amount of sprays left
   amountOfSprays = EEPROM.get(1, amountOfSprays);
+
   // Start up the onewire library
   sensors.begin();
 }
@@ -191,10 +189,14 @@ return b;
 }
 
 void loop() {
+
+
   buttonArray = readButtons(A5);
   magPut = analogRead(magPin);
   motionPut = analogRead(motionPut);
   lightValue = analogRead (lightPin); 
+
+
 
   // messure Distance in cm
   digitalWrite(triggerPin, LOW);
@@ -205,18 +207,14 @@ void loop() {
 
   duration = pulseIn(echoPin, HIGH);
   distance = (duration / 2) / 29.1;
+
+
+
+
   EEPROM.update(0, amountOfSprays);
 
-  //------------------------------------------------------------------------------------------------------------------------------------------
-  // Some things might wanna be put in different functions and or classes
-  // a switch for program states. 
-  // idle state - waiting for anything to happen
-  // in use state - should display nr 1 and nr 2 with leds -> manual spray button -> all sprays should be configurable delay
-  // cleaning state - the system should not spray -> wait for idle to return
-  // menu state - all other functionality should halt -> reconfigure spray delay for each time a spray can occur -> reset number of shots in the spray can -> menu closes after a certain idle time
-  //------------------------------------------------------------------------------------------------------------------------------------------
-  
-  //spray delays is delay + 15 at least
+
+
 
   
 
@@ -246,26 +244,21 @@ void loop() {
     {
       menuStart = 4;
     }
-    
-
-    //------------------------------------------------------------------------------------------------------------------------------------------
-    // temp display constantly updating at least every 2  Seconds
-    // check for activation of system by light or motion sensor
-    //------------------------------------------------------------------------------------------------------------------------------------------
-
+    //testTimer is to update the temperature sensor.
     testTimer ++;
     tempChecker();
- 
+
+    //Display the current temperature on the idle screen.
     printingTwoLines("Local temp:" + String(tempPrinter)+ " ", "Sprays Left:" + String(amountOfSprays));
     
   } 
-  else if (menuStart == 1) {
-    // timer is to make sure that whenever the button is pressed it does not instantly press the next option as well so you can actually see the menu.
+  else if (menuStart == 1) { //Main menu state
+    //Led states of this program state
     digitalWrite(blueLed, LOW);
-    digitalWrite(redLed, HIGH);
-    
+    digitalWrite(redLed, HIGH);   
     digitalWrite(greenLed, LOW);
   
+    // timer is to make sure that whenever the button is pressed it does not instantly press the next option as well so you can actually see the menu.
     if (timer > 0) {
       timer--;
     } else {
@@ -297,7 +290,7 @@ void loop() {
       printingTwoLines(menuItems[menu],menuItems[menu + 1] );
     }
   } 
-  else if (menuStart == 2) {
+  else if (menuStart == 2) { //The delay selection menu
     digitalWrite(blueLed, LOW);
     digitalWrite(redLed, HIGH);
     
@@ -333,7 +326,7 @@ void loop() {
   } 
 
   
-  else if (menuStart == 3) {
+  else if (menuStart == 3) { // the cleaning state
     printingTwoLines(modeTexts[1], modeTexts[0]);
     digitalWrite(blueLed, LOW);
     digitalWrite(redLed, LOW);
@@ -350,11 +343,18 @@ void loop() {
     timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
   } 
 
-  else if (menuStart == 4) {
+  else if (menuStart == 4) {// The unknown state state waiting for user input
     digitalWrite(blueLed, HIGH);
     digitalWrite(redLed, LOW);
     
     digitalWrite(greenLed, HIGH);
+        
+          if (buttonArray == 1) {
+            menuStart = 1;
+            timer = 100;
+          }
+        
+          
     light(lightValue);
     if(lightOn == false)
     {
@@ -377,9 +377,8 @@ void loop() {
   }
 
 
-  else if (menuStart == 5) {
+  else if (menuStart == 5) { // The user is on the toilet state
 
-    //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
 
     
      //timer needs to countdown from 2 minutes, if those are over and the distance is still less than 100 cm it should go into nr 2 mode
@@ -445,10 +444,10 @@ void loop() {
 
 
 
-    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+    timer = 200;
   }
 
-  else if (menuStart == 6) {
+  else if (menuStart == 6) { //choosing delay options within the delay menu state for number 1
 
     if (buttonArray == 2) {
       if (delayCycle == 3) {
@@ -477,10 +476,10 @@ void loop() {
    
 
 
-    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+    timer = 200; 
   }
 
-  else if (menuStart == 7) {
+  else if (menuStart == 7) {//choosing delay options within the delay menu state for number 2
 
 
     if (buttonArray == 2) {
@@ -510,10 +509,10 @@ void loop() {
   
 
    
-    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+    timer = 200; 
   }
 
-  else if (menuStart == 8) {
+  else if (menuStart == 8) { //choosing delay options within the delay menu state for the manual spray
 
 
     if (buttonArray == 2) {
@@ -540,15 +539,15 @@ void loop() {
       
 
     }   
-    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+    timer = 200; 
   }
 
   else if (menuStart == 9) {
-    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+    timer = 200; 
   }
 
   else if (menuStart == 10) {
-    timer = 200; //can be replaced if something else needs to happen during a selection of an option, currently it finishes an action before coming back here
+    timer = 200; 
   }
 
 
@@ -707,18 +706,3 @@ void DelayTimer(unsigned long ms)
     }
 }
    
-/*
-idle = leds uit
-menu = rood aan
-schoonmaken = groen aan
-nr 1 = blauw aan
-nr 2 = blauw en rood aan
-unknown = groen en blauw
-    
-
-//////----------------------------------
-/* doos maken
-
-amount of sprays in right memory...
-
-*/ 
