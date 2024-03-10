@@ -356,7 +356,7 @@ void loop() {
     {
       menuStart = 0;
     }
-    printingTwoLines(modeTexts[4], String(lightValue));
+    printingTwoLines(modeTexts[4], modeTexts[0]);
     magnetCheck();
     distanceCheck();
     
@@ -393,12 +393,12 @@ void loop() {
           printingTwoLines(modeTexts[2], modeTexts[0]);
           while (millis() - start < toiletTime)
           {
-              if (distance > 100)
+              if (distance > 30)
               {
                   toiletMode = 1;
-                  printingTwoLines (String(toiletMode), "aaaaaa");
-                  break;
-              } else if ( distance > 100)
+                  
+                 
+              } else if ( distance < 30)
               {
                 toiletMode = 0;
               }
@@ -411,9 +411,10 @@ void loop() {
     sprayActivate(pissSpray);
     toiletMode = 2;
     menuStart = 0;
+    lightOn = false;
     
     }
-    else if (toiletMode == 0)
+   if (toiletMode == 0)
     {
 
     printingTwoLines(modeTexts[3], modeTexts[0]);
@@ -421,7 +422,7 @@ void loop() {
     digitalWrite(redLed, HIGH);
     
     digitalWrite(greenLed, LOW);
-    if (distance > 100)
+    if (distance > 30)
     {
 
 
@@ -429,6 +430,7 @@ void loop() {
     sprayActivate(3);
     toiletMode = 2;
     menuStart = 0;
+    lightOn = false;
     }
     }
     
@@ -591,7 +593,7 @@ void executeDelayAction() {
 
 void distanceCheck()
 {
-  if (distance < 100 && distance > 20)
+  if (distance < 30 && distance > 0)
   {
     menuStart = 5;
   }
@@ -652,13 +654,18 @@ void printingTwoLines(String line1, String line2)
 
 void light(int value)
 {
-    if(lightValue > (lightCurrent + 100) )
+    if(lightValue > (lightCurrent + 200) )
     {
         lightOn = true;
     }
     else if (lightValue < 400|| lightValue < (lightCurrent -100))
     {
         lightOn = false;
+    }
+    else if (lightValue >= 600 && motionPut > 800)
+    {
+      lightOn = true;
+
     }
     lightCurrent = lightValue;
 
