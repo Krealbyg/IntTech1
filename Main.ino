@@ -42,6 +42,7 @@
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <EEPROM.h>
 
 
 // Data wire is plugged into port 5 on the Arduino
@@ -126,7 +127,8 @@ int lightCurrent = 1000;
 int lightThres = 200;
 bool lightOn = false;
 //this needs to be on the non volataile memory:
-int amountOfSprays = 4200;
+int amountOfSprays   ;
+
 
 
 
@@ -151,6 +153,8 @@ void setup() {
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
   
+ // amountOfSprays = EEPROM.get(0, memSprays);
+  amountOfSprays = EEPROM.get(1, amountOfSprays);
   // Start up the onewire library
   sensors.begin();
 }
@@ -201,7 +205,7 @@ void loop() {
 
   duration = pulseIn(echoPin, HIGH);
   distance = (duration / 2) / 29.1;
-
+  EEPROM.update(0, amountOfSprays);
 
   //------------------------------------------------------------------------------------------------------------------------------------------
   // Some things might wanna be put in different functions and or classes
@@ -621,19 +625,7 @@ void executeAction() {
      timer = 100;
       break;
     case 2:
-      //menuStart = 3;
-      lcd.setCursor(0, 0);
-      lcd.print("Blinking three ");
-      lcd.setCursor(0, 1);
-      lcd.print("times green");
-
-
-      for (int i = 0; i < 3; i++) {
-        // digitalWrite(ledPin, HIGH);
-        // delay(300);
-        // digitalWrite(ledPin, LOW);
-        // delay(300);
-      }
+      resetSprays();
       menuStart = 0;
       timer = 100;
 
@@ -662,7 +654,7 @@ void light(int value)
     {
         lightOn = false;
     }
-    else if (lightValue >= 600 && motionPut > 800)
+    else if (lightValue >= 600 && motionPut > 1100)
     {
       lightOn = true;
 
@@ -681,7 +673,13 @@ void tempChecker()
       testTimer = 0;
     }
 }
+void resetSprays()
+{
+  amountOfSprays = 4200;
+  EEPROM.put(1, 4200);
 
+
+}
 void sprayActivate(int delay)
 {
   printingTwoLines("Spray incoming!!", "                ");
@@ -691,7 +689,9 @@ void sprayActivate(int delay)
   DelayTimer(standardDelay);
   digitalWrite(mosfet, LOW);
   toiletMode = 2;
+  amountOfSprays = amountOfSprays -1;
   
+  EEPROM.put(1, amountOfSprays);
   
 
 
