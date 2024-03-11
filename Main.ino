@@ -557,7 +557,7 @@ void loop() {
 
 }
 
-
+//Executes the item in the configure delays menu
 void executeDelayAction() {
   switch (delayMenu) {
     case 0:
@@ -592,7 +592,7 @@ void executeDelayAction() {
 }
 
 
-
+//checks if someone is on the toilet by seeing if the distance is under a set value
 
 void distanceCheck()
 {
@@ -603,6 +603,7 @@ void distanceCheck()
 
 
 }
+//checks if the magnet sensor is open or closed.
 void magnetCheck()
 {
    if (magPut > magOpen)
@@ -632,6 +633,7 @@ void executeAction() {
     
   }
 }
+//prints to both lines of the lcd screen
 void printingTwoLines(String line1, String line2)
 {
       lcd.setCursor(0, 0);
@@ -642,7 +644,7 @@ void printingTwoLines(String line1, String line2)
 
 
 }
-
+//checks if a light turns off or on, or if the motion sensor goes off in a highly lit area
 void light(int value)
 {
     if(lightValue > (lightCurrent + 200) )
@@ -662,7 +664,7 @@ void light(int value)
 
 }
 
-
+//checks the temperature to be displayed on the idle ascreen
 void tempChecker()
 {
    sensors.requestTemperatures();
@@ -672,13 +674,17 @@ void tempChecker()
       testTimer = 0;
     }
 }
+//reset the amount of sprays left in a can
 void resetSprays()
 {
-  amountOfSprays = 4200;
-  EEPROM.put(1, 4200);
+  amountOfSprays = 2400;
+  EEPROM.put(1, 2400);
 
 
 }
+
+
+//activates the mosfet to spray the air freshener.
 void sprayActivate(int delay)
 {
   printingTwoLines("Spray incoming!!", "                ");
@@ -696,7 +702,7 @@ void sprayActivate(int delay)
 
 }
   
-
+// a timer
 void DelayTimer(unsigned long ms)
 {
     unsigned long start = millis();
